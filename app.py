@@ -65,16 +65,18 @@ app.layout = html.Div([
         interval=1200000,  # Every 20 minutes
         n_intervals=0
     ),
-    html.H1("Liczba przeprowadzonych operacji w klinikach medycznych"),
+    html.H3("Liczba przeprowadzonych operacji"),
     dcc.Graph(id='bar-chart-operacje', config={'displayModeBar': True}),
-    html.H1("Liczba przyjętych pacjentów w klinikach medycznych"),
+    html.H3("Liczba przyjętych pacjentów"),
     dcc.Graph(id='pie-chart-pacjenci', config={'displayModeBar': True}),
-    html.H1("Liczba nagłych wypadków w klinikach medycznych"),
+    html.H3("Liczba nagłych wypadków"),
     dcc.Graph(id='scatter-chart-nagle-przypadki', config={'displayModeBar': True}),
-    html.H1("Średni czas hospitalizacji w klinikach medycznych"),
-    dcc.Graph(id='heatmap-hospitalizacja', config={'displayModeBar': True}),
-    html.H1("Średni czas oczekiwania na wizytę w klinikach medycznych"),
+    html.H3("Średni czas hospitalizacji"),
+    dcc.Graph(id='bar-chart-hospitalizacja', config={'displayModeBar': True}),
+    html.H3("Średni czas oczekiwania na wizytę"),
     dcc.Graph(id='line-chart-oczekiwanie', config={'displayModeBar': True}),
+    html.H3("Średni czas wizyty"),
+    dcc.Graph(id='pie-chart-wizyta', config={'displayModeBar': True}),
 ])
 
 
@@ -82,8 +84,9 @@ app.layout = html.Div([
     [Output('bar-chart-operacje', 'figure'),
      Output('pie-chart-pacjenci', 'figure'),
      Output('scatter-chart-nagle-przypadki', 'figure'),
-     Output('heatmap-hospitalizacja', 'figure'),
+     Output('bar-chart-hospitalizacja', 'figure'),
      Output('line-chart-oczekiwanie', 'figure'),
+     Output('pie-chart-wizyta', 'figure'),
      Output('placowka-dropdown', 'options')],
     [Input('interval-component', 'n_intervals'),
      Input('placowka-dropdown', 'value')]
@@ -98,6 +101,7 @@ def update_charts(n_intervals, selected_placowka):
         future_nagle_przypadki = executor.submit(fetch_and_process_data, tb_client, 'liczba_naglych_przypadkow', 'minuta', 'suma_naglych_przypadkow')
         future_hospitalizacja = executor.submit(fetch_and_process_avg_hospitalization, tb_client, 'sredni_czas_hospitalizacji')
         future_oczekiwanie = executor.submit(fetch_and_process_avg_waiting_time, tb_client, 'sredni_czas_oczekiwania_na_wizyte')
+        future_wizyta = executor.submit(fetch_and_process_avg_waiting_time, tb_client, 'sredni_czas_wizyty')
 
         data_operacje = future_operacje.result()
         data_pacjenci = future_pacjenci.result()
