@@ -50,6 +50,7 @@ def fetch_and_process_avg_waiting_time(tb_client, pipe_name):
     return data
 
 
+
 app.layout = html.Div([
     html.H1("Wybierz placówkę"),
     dcc.Dropdown(
@@ -83,6 +84,7 @@ app.layout = html.Div([
      Output('scatter-chart-nagle-przypadki', 'figure'),
      Output('heatmap-hospitalizacja', 'figure'),
      Output('line-chart-oczekiwanie', 'figure'),
+     Output('line-chart-wizyta', 'figure'),
      Output('placowka-dropdown', 'options')],
     [Input('interval-component', 'n_intervals'),
      Input('placowka-dropdown', 'value')]
