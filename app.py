@@ -84,7 +84,6 @@ app.layout = html.Div([
      Output('scatter-chart-nagle-przypadki', 'figure'),
      Output('heatmap-hospitalizacja', 'figure'),
      Output('line-chart-oczekiwanie', 'figure'),
-     Output('line-chart-wizyta', 'figure'),
      Output('placowka-dropdown', 'options')],
     [Input('interval-component', 'n_intervals'),
      Input('placowka-dropdown', 'value')]
