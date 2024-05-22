@@ -108,6 +108,8 @@ def update_charts(n_intervals, selected_placowka):
         data_nagle_przypadki = future_nagle_przypadki.result()
         data_hospitalizacja = future_hospitalizacja.result()
         data_oczekiwanie = future_oczekiwanie.result()
+        data_wizyta = future_wizyta.result()
+
 
     # Update dropdown options
     placowki = data_operacje['placowka'].unique()
