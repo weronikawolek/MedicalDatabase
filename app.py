@@ -41,7 +41,7 @@ app.layout = html.Div([
     ),
     dcc.Interval(
         id='interval-component',
-        interval=1200000,  # co 3 sekundy
+        interval=1200000,  # co 20 minut, a w sumie to nawet wiecej niz 20 xdd
         n_intervals=0
     ),
     html.H1("Liczba przeprowadzonych operacji w klinikach medycznych"),
