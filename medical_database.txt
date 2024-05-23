@@ -1,0 +1,135 @@
+{
+  "znacznik_czasu": {
+    "type": "mockingbird.timestampNow"
+  },
+  "placowka": {
+    "type": "mockingbird.pickWeighted",
+    "params": [
+      {
+        "values": [
+          "EterMed",
+          "NZOZ Gliński",
+          "MediVers",
+          "Przychodnia Miła",
+          "Poradnia Rodzinna",
+          "Health Clinic",
+          "Centrum Zdrowia",
+          "SwayMed",
+          "Oktomed",
+          "Przychodnia Słowacki"
+        ],
+        "weights": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    ]
+  },
+  "czas_oczekiwania_na_wizyte": {
+    "type": "number.int",
+    "params": [
+      {
+        "min": 10,
+        "max": 40
+      }
+    ]
+  },
+  "dostepne_lozka": {
+    "type": "number.int",
+    "params": [
+      {
+        "min": 0,
+        "max": 40
+      }
+    ]
+  },
+  "sprzet_medyczny": {
+    "type": "number.int",
+    "params": [
+      {
+        "min": 20,
+        "max": 100
+      }
+    ]
+  },
+  "personel_medyczny": {
+    "type": "number.int",
+    "params": [
+      {
+        "min": 15,
+        "max": 60
+      }
+    ]
+  },
+  "przyjeci_pacjenci": {
+    "type": "number.int",
+    "params": [
+      {
+        "min": 2,
+        "max": 50
+      }
+    ]
+  },
+  "nagle_przypadki": {
+    "type": "number.int",
+    "params": [
+      {
+        "min": 2,
+        "max": 7
+      }
+    ]
+  },
+  "czas_wizyty": {
+    "type": "number.int",
+    "params": [
+      {
+        "min": 10,
+        "max": 30
+      }
+    ]
+  },
+  "czas_hospitalizacji": {
+    "type": "number.int",
+    "params": [
+      {
+        "min": 1,
+        "max": 150
+      }
+    ]
+  },
+  "wykonane_zabiegi": {
+    "type": "number.int",
+    "params": [
+      {
+        "min": 5,
+        "max": 20
+      }
+    ]
+  },
+  "przeprowadzone_operacje": {
+    "type": "number.int",
+    "params": [
+      {
+        "min": 1,
+        "max": 10
+      }
+    ]
+  },
+  "zadowolenie_pacjenta": {
+    "type": "number.int",
+    "params": [
+      {
+        "min": 1,
+        "max": 5
+      }
+    ]
+  }
+}
