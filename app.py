@@ -68,6 +68,22 @@ def fetch_and_process_medical_equipment(tb_client, pipe_name):
     data = data.sort_values(by=['minuta'])
     return data
 
+# Pobieranie i przetwarzanie danych o personelu medycznym
+def fetch_and_process_medical_staff(tb_client, pipe_name):
+    response = tb_client.pipe(pipe_name).query()
+    data = pd.json_normalize(response.data)
+    data['minuta'] = pd.to_datetime(data['minuta'])
+    data = data.sort_values(by=['minuta'])
+    return data
+
+# Pobieranie i przetwarzanie danych o dostępnych wolnych łóżkach
+def fetch_and_process_free_beds(tb_client, pipe_name):
+    response = tb_client.pipe(pipe_name).query()
+    data = pd.json_normalize(response.data)
+    data['minuta'] = pd.to_datetime(data['minuta'])
+    data = data.sort_values(by=['minuta'])
+    return data
+
 app.layout = dbc.Container([
     dbc.Row([
         dbc.Col(html.H1("Dostęp do usług medycznych uaktualnianych w czasie rzeczywistym", style={'color': 'LightBlue', 'font-family': 'Georgia', 'font-weight': 'bold'}, className='text-center'), width=12),
@@ -94,7 +110,9 @@ app.layout = dbc.Container([
         dbc.Col([dcc.Graph(id='line-chart-czas-wizyty', config={'displayModeBar': False})], width=6)  # Wykres liniowy
     ]),
     dbc.Row([dbc.Col([dcc.Graph(id='line-chart-oczekiwanie', config={'displayModeBar': False})], width=12)]),  # Przesunięty wykres
-    dbc.Row([dbc.Col([dcc.Graph(id='bar-chart-sprzet', config={'displayModeBar': False})], width=12)])  # Nowy wykres słupkowy
+    dbc.Row([dbc.Col([dcc.Graph(id='bar-chart-sprzet', config={'displayModeBar': False})], width=12)]),  # Nowy wykres słupkowy
+    dbc.Row([dbc.Col([dcc.Graph(id='bar-chart-personel', config={'displayModeBar': False})], width=12)]),  # Nowy poziomy wykres słupkowy
+    dbc.Row([dbc.Col([dcc.Graph(id='scatter-chart-lozka', config={'displayModeBar': False})], width=12)])  # Nowy wykres punktowy
 ], fluid=True)
 
 @app.callback(
@@ -106,6 +124,8 @@ app.layout = dbc.Container([
      Output('line-chart-czas-wizyty', 'figure'),  # Wykres liniowy
      Output('line-chart-oczekiwanie', 'figure'),
      Output('bar-chart-sprzet', 'figure'),  # Nowy wykres słupkowy
+     Output('bar-chart-personel', 'figure'),  # Nowy poziomy wykres słupkowy
+     Output('scatter-chart-lozka', 'figure'),  # Nowy wykres punktowy
      Output('placowka-dropdown', 'options')],
     [Input('interval-component', 'n_intervals'),
      Input('placowka-dropdown', 'value')]
@@ -123,6 +143,8 @@ def update_charts(n_intervals, selected_placowka):
         future_zabiegi = executor.submit(fetch_and_process_procedures, tb_client, 'liczba_wykonanych_zabiegow')
         future_czas_wizyty = executor.submit(fetch_and_process_avg_visit_time, tb_client, 'sredni_czas_wizyty')
         future_sprzet = executor.submit(fetch_and_process_medical_equipment, tb_client, 'sprzet_medyczny')
+        future_personel = executor.submit(fetch_and_process_medical_staff, tb_client, 'personel_medyczny')
+        future_lozka = executor.submit(fetch_and_process_free_beds, tb_client, 'dostepne_lozka')  # Nowa funkcja do pobierania danych o wolnych łóżkach
 
         data_pacjenci = future_pacjenci.result()
         data_operacje = future_operacje.result()
@@ -132,6 +154,8 @@ def update_charts(n_intervals, selected_placowka):
         data_zabiegi = future_zabiegi.result()
         data_czas_wizyty = future_czas_wizyty.result()
         data_sprzet = future_sprzet.result()
+        data_personel = future_personel.result()
+        data_lozka = future_lozka.result()  # Przetworzone dane o wolnych łóżkach
 
     # Aktualizacja opcji dropdown
     placowki = data_operacje['placowka'].unique()
@@ -147,6 +171,8 @@ def update_charts(n_intervals, selected_placowka):
         filtered_zabiegi = data_zabiegi[data_zabiegi['placowka'] == selected_placowka]
         filtered_czas_wizyty = data_czas_wizyty[data_czas_wizyty['placowka'] == selected_placowka]
         filtered_sprzet = data_sprzet[data_sprzet['placowka'] == selected_placowka]
+        filtered_personel = data_personel[data_personel['placowka'] == selected_placowka]
+        filtered_lozka = data_lozka[data_lozka['placowka'] == selected_placowka]  # Filtracja danych o wolnych łóżkach
     else:
         filtered_pacjenci = data_pacjenci
         filtered_operacje = data_operacje
@@ -156,6 +182,8 @@ def update_charts(n_intervals, selected_placowka):
         filtered_zabiegi = data_zabiegi
         filtered_czas_wizyty = data_czas_wizyty
         filtered_sprzet = data_sprzet
+        filtered_personel = data_personel
+        filtered_lozka = data_lozka  # Dane o wolnych łóżkach bez filtra
 
     # Przygotowanie danych do wykresów
     bar_data = filtered_pacjenci.groupby('placowka')['suma_przyjetych_pacjentow'].sum().reset_index()
@@ -318,7 +346,50 @@ def update_charts(n_intervals, selected_placowka):
         hovermode='x'
     )
 
-    return fig_pacjenci, fig_nagle_przypadki, fig_operacje, fig_zabiegi, fig_hospitalizacja, fig_czas_wizyty, fig_oczekiwanie, fig_sprzet, dropdown_options
+    # Przygotowanie danych do wykresu poziomego słupkowego dla personelu medycznego
+    bar_personel_data = filtered_personel.groupby('placowka')['personel_medyczny'].sum().reset_index()
+
+    fig_personel = px.bar(
+        bar_personel_data,
+        y='placowka',
+        x='personel_medyczny',
+        labels={'personel_medyczny': 'Personel medyczny', 'placowka': 'Placówka'},
+        template='plotly_white',
+        orientation='h',  # Ustawienie orientacji wykresu na poziomą
+        color_discrete_sequence=px.colors.qualitative.Pastel2  # Niestandardowa sekwencja kolorów
+    )
+
+    fig_personel.update_layout(
+        title={'text': 'Personel medyczny w klinikach medycznych', 'x': 0.5, 'xanchor': 'center', 'font': {'family': 'Georgia'}},
+        xaxis_title='Personel medyczny',
+        yaxis_title='Placówka',
+        legend_title='Placówka',
+        hovermode='y'
+    )
+
+    # Przygotowanie danych do wykresu punktowego dla dostępnych wolnych łóżek
+    scatter_lozka_data = filtered_lozka.groupby(['minuta', 'placowka'])[
+        'suma_dostepnych_lozek'].sum().reset_index()
+
+    fig_lozka = px.scatter(
+        scatter_lozka_data,
+        x='minuta',
+        y='suma_dostepnych_lozek',
+        color='placowka',
+        labels={'suma_dostepnych_lozek': 'Dostępne wolne łóżka', 'minuta': 'Czas'},
+        template='plotly_white',
+        color_discrete_sequence=px.colors.qualitative.Pastel1  # Niestandardowa sekwencja kolorów
+    )
+
+    fig_lozka.update_layout(
+        title={'text': 'Dostępne wolne łóżka w klinikach medycznych', 'x': 0.5, 'xanchor': 'center', 'font': {'family': 'Georgia'}},
+        xaxis_title='Czas',
+        yaxis_title='Dostępne wolne łóżka',
+        legend_title='Placówka',
+        hovermode='x'
+    )
+
+    return fig_pacjenci, fig_nagle_przypadki, fig_operacje, fig_zabiegi, fig_hospitalizacja, fig_czas_wizyty, fig_oczekiwanie, fig_sprzet, fig_personel, fig_lozka, dropdown_options
 
 if __name__ == '__main__':
     app.run_server(debug=True)
