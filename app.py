@@ -110,7 +110,7 @@ app.layout = dbc.Container([
     ]),
     dcc.Interval(
         id='interval-component',
-        interval=21600000,  # Co 6 h
+        interval=3000,  # Co 6 h
         n_intervals=0
     ),
     dbc.Row([dbc.Col([dcc.Graph(id='bar-chart-pacjenci', config={'displayModeBar': False})], width=12)]),
@@ -284,7 +284,7 @@ def update_charts(n_intervals, selected_placowka):
         x='minuta',
         y='sredni_czas_hospitalizacji',
         color='placowka',
-        labels={'sredni_czas_hospitalizacji': 'Średni czas hospitalizacji (minuty)', 'minuta': 'Czas'},
+        labels={'sredni_czas_hospitalizacji': 'Średni czas hospitalizacji (dni)', 'minuta': 'Czas'},
         template='plotly_white',
         color_discrete_sequence=px.colors.qualitative.Pastel1  # Niestandardowa sekwencja kolorów
     )
@@ -292,7 +292,7 @@ def update_charts(n_intervals, selected_placowka):
     fig_hospitalizacja.update_layout(
         title={'text': 'Średni czas hospitalizacji w klinikach medycznych', 'x': 0.5, 'xanchor': 'center', 'font': {'color': 'darkgrey', 'family': 'Georgia'}},
         xaxis_title='Czas',
-        yaxis_title='Średni czas hospitalizacji (minuty)',
+        yaxis_title='Średni czas hospitalizacji (dni)',
         legend_title='Placówka',
         hovermode='x'
     )
@@ -328,7 +328,7 @@ def update_charts(n_intervals, selected_placowka):
         x='minuta',
         y='sredni_czas_oczekiwania_na_wizyte',
         color='placowka',
-        labels={'sredni_czas_oczekiwania_na_wizyte': 'Średni czas oczekiwania (minuty)', 'minuta': 'Czas'},
+        labels={'sredni_czas_oczekiwania_na_wizyte': 'Średni czas oczekiwania (dni)', 'minuta': 'Czas'},
         template='plotly_white',
         color_discrete_sequence=px.colors.qualitative.Pastel2  # Niestandardowa sekwencja kolorów
     )
@@ -336,7 +336,7 @@ def update_charts(n_intervals, selected_placowka):
     fig_oczekiwanie.update_layout(
         title={'text': 'Średni czas oczekiwania na wizytę w klinikach medycznych', 'x': 0.5, 'xanchor': 'center', 'font': {'color': 'darkgrey', 'family': 'Georgia'}},
         xaxis_title='Czas',
-        yaxis_title='Średni czas oczekiwania (minuty)',
+        yaxis_title='Średni czas oczekiwania (dni)',
         legend_title='Placówka',
         hovermode='x'
     )
