@@ -7,9 +7,12 @@ from verdin import tinybird
 import json
 import concurrent.futures
 
+
 app = Dash(__name__, external_stylesheets=[dbc.themes.COSMO])
 
+
 server = app.server
+
 
 # Funkcja inicjalizująca klienta Tinybird
 def initialize_tb_client():
@@ -18,6 +21,7 @@ def initialize_tb_client():
         tb_token = data['token']
         tb_host = data['host']
     return tinybird.Client(token=tb_token, api=tb_host)
+
 
 # Pobieranie i przetwarzanie danych z Tinybird
 def fetch_and_process_data(tb_client, pipe_name, time_column, sum_column):
@@ -28,6 +32,7 @@ def fetch_and_process_data(tb_client, pipe_name, time_column, sum_column):
     data['suma_skumulowana'] = data.groupby('placowka')[sum_column].cumsum()
     return data
 
+
 # Pobieranie i przetwarzanie danych o średnim czasie hospitalizacji
 def fetch_and_process_avg_hospitalization(tb_client, pipe_name):
     response = tb_client.pipe(pipe_name).query()
@@ -35,6 +40,7 @@ def fetch_and_process_avg_hospitalization(tb_client, pipe_name):
     data['minuta'] = pd.to_datetime(data['minuta'])
     data = data.sort_values(by=['minuta'])
     return data
+
 
 # Pobieranie i przetwarzanie danych o średnim czasie oczekiwania
 def fetch_and_process_avg_waiting_time(tb_client, pipe_name):
@@ -44,6 +50,7 @@ def fetch_and_process_avg_waiting_time(tb_client, pipe_name):
     data = data.sort_values(by=['minuta'])
     return data
 
+
 # Pobieranie i przetwarzanie danych o liczbie wykonanych zabiegów
 def fetch_and_process_procedures(tb_client, pipe_name):
     response = tb_client.pipe(pipe_name).query()
@@ -51,6 +58,7 @@ def fetch_and_process_procedures(tb_client, pipe_name):
     data['minuta'] = pd.to_datetime(data['minuta'])
     data = data.sort_values(by=['minuta'])
     return data
+
 
 # Pobieranie i przetwarzanie danych o średnim czasie wizyty
 def fetch_and_process_avg_visit_time(tb_client, pipe_name):
@@ -60,6 +68,7 @@ def fetch_and_process_avg_visit_time(tb_client, pipe_name):
     data = data.sort_values(by=['minuta'])
     return data
 
+
 # Pobieranie i przetwarzanie danych o dostępnym sprzęcie medycznym
 def fetch_and_process_medical_equipment(tb_client, pipe_name):
     response = tb_client.pipe(pipe_name).query()
@@ -67,6 +76,7 @@ def fetch_and_process_medical_equipment(tb_client, pipe_name):
     data['minuta'] = pd.to_datetime(data['minuta'])
     data = data.sort_values(by=['minuta'])
     return data
+
 
 # Pobieranie i przetwarzanie danych o personelu medycznym
 def fetch_and_process_medical_staff(tb_client, pipe_name):
@@ -76,6 +86,7 @@ def fetch_and_process_medical_staff(tb_client, pipe_name):
     data = data.sort_values(by=['minuta'])
     return data
 
+
 # Pobieranie i przetwarzanie danych o dostępnych wolnych łóżkach
 def fetch_and_process_free_beds(tb_client, pipe_name):
     response = tb_client.pipe(pipe_name).query()
@@ -84,21 +95,22 @@ def fetch_and_process_free_beds(tb_client, pipe_name):
     data = data.sort_values(by=['minuta'])
     return data
 
+
 app.layout = dbc.Container([
     dbc.Row([
-        dbc.Col(html.H1("Dostęp do usług medycznych uaktualnianych w czasie rzeczywistym", style={'color': 'LightBlue', 'font-family': 'Georgia', 'font-weight': 'bold'}, className='text-center'), width=12),
+        dbc.Col(html.H1("DOSTĘP DO USŁUG MEDYCZNYCH W CZASIE RZECZYWISTYM", style={'color': 'LightBlue', 'font-family': 'Georgia', 'font-weight': 'bold'}, className='text-center'), width=12),
+        #dbc.Col(html.P("Strona stworzona przez Julię Kordek, Weronikę Wołek oraz Matyldę Lange.", style={'color': 'LightPink', 'font-family': 'Georgia', 'font-weight': 'normal', 'text-align': 'right', 'display': 'flex', 'justify-content': 'right', 'align-items': 'right', 'height': '20px'}, className='text-center'), width=20),
         dbc.Col(dcc.Dropdown(
             id='placowka-dropdown',
             options=[],  # Opcje będą zaktualizowane po inicjalnym załadowaniu danych
             value=None,  # Domyślna wartość
             placeholder="Wybierz placówkę",
-            style={'color': 'DarkPink', 'font-family': 'Georgia'},
             clearable=True
         ), width=12),
     ]),
     dcc.Interval(
         id='interval-component',
-        interval=1200000,  # Co 20 minut
+        interval=21600000,  # Co 6 h
         n_intervals=0
     ),
     dbc.Row([dbc.Col([dcc.Graph(id='bar-chart-pacjenci', config={'displayModeBar': False})], width=12)]),
@@ -114,6 +126,7 @@ app.layout = dbc.Container([
     dbc.Row([dbc.Col([dcc.Graph(id='bar-chart-personel', config={'displayModeBar': False})], width=12)]),  # Nowy poziomy wykres słupkowy
     dbc.Row([dbc.Col([dcc.Graph(id='scatter-chart-lozka', config={'displayModeBar': False})], width=12)])  # Nowy wykres punktowy
 ], fluid=True)
+
 
 @app.callback(
     [Output('bar-chart-pacjenci', 'figure'),
@@ -198,12 +211,13 @@ def update_charts(n_intervals, selected_placowka):
     )
 
     fig_pacjenci.update_layout(
-        title={'text': 'Liczba przyjętych pacjentów w klinikach medycznych', 'x': 0.5, 'xanchor': 'center'},
+        title={'text': 'Liczba przyjętych pacjentów w klinikach medycznych', 'x': 0.5, 'xanchor': 'center', 'font': {'color': 'darkgrey', 'family': 'Georgia'}},
         xaxis_title='Placówka',
         yaxis_title='Łączna liczba pacjentów',
         legend_title='Placówka',
         hovermode='x'
     )
+    fig_pacjenci.update_traces(marker_color='LightPink')
 
     # Przygotowanie danych do wykresu poziomego słupkowego dla nagłych przypadków
     bar_nagle_przypadki_data = filtered_nagle_przypadki.groupby('placowka')['suma_naglych_przypadkow'].sum().reset_index()
@@ -219,12 +233,13 @@ def update_charts(n_intervals, selected_placowka):
     )
 
     fig_nagle_przypadki.update_layout(
-        title={'text': 'Liczba nagłych przypadków w klinikach medycznych', 'x': 0.5, 'xanchor': 'center', 'font': {'family': 'Georgia'}},
+        title={'text': 'Liczba nagłych przypadków w klinikach medycznych', 'x': 0.5, 'xanchor': 'center', 'font': {'color': 'darkgrey', 'family': 'Georgia'}},
         xaxis_title='Liczba nagłych przypadków',
         yaxis_title='Placówka',
         legend_title='Placówka',
         hovermode='y'
     )
+    fig_nagle_przypadki.update_traces(marker_color='LightBlue')
 
     # Przygotowanie danych do wykresu kołowego dla operacji
     pie_data = filtered_operacje.groupby('placowka')['suma_skumulowana'].sum().reset_index()
@@ -240,7 +255,7 @@ def update_charts(n_intervals, selected_placowka):
     fig_operacje.update_traces(textinfo='value')  # Wyświetlanie tylko liczby
 
     fig_operacje.update_layout(
-        title={'text': 'Liczba przeprowadzonych operacji w klinikach medycznych', 'x': 0.5, 'xanchor': 'center', 'font': {'family': 'Georgia'}}
+        title={'text': 'Liczba przeprowadzonych operacji w klinikach medycznych', 'x': 0.5, 'xanchor': 'center', 'font': {'color': 'darkgrey', 'family': 'Georgia'}}
     )
 
     # Przygotowanie danych do wykresu kołowego dla zabiegów
@@ -257,7 +272,7 @@ def update_charts(n_intervals, selected_placowka):
     fig_zabiegi.update_traces(textinfo='value')  # Wyświetlanie tylko liczby
 
     fig_zabiegi.update_layout(
-        title={'text': 'Liczba wykonanych zabiegów w klinikach medycznych', 'x': 0.5, 'xanchor': 'center', 'font': {'family': 'Georgia'}}
+        title={'text': 'Liczba wykonanych zabiegów w klinikach medycznych', 'x': 0.5, 'xanchor': 'center', 'font': {'color': 'darkgrey', 'family': 'Georgia'}}
     )
 
     # Przygotowanie danych do wykresu liniowego dla średniego czasu hospitalizacji
@@ -275,7 +290,7 @@ def update_charts(n_intervals, selected_placowka):
     )
 
     fig_hospitalizacja.update_layout(
-        title={'text': 'Średni czas hospitalizacji w klinikach medycznych', 'x': 0.5, 'xanchor': 'center', 'font': {'family': 'Georgia'}},
+        title={'text': 'Średni czas hospitalizacji w klinikach medycznych', 'x': 0.5, 'xanchor': 'center', 'font': {'color': 'darkgrey', 'family': 'Georgia'}},
         xaxis_title='Czas',
         yaxis_title='Średni czas hospitalizacji (minuty)',
         legend_title='Placówka',
@@ -297,7 +312,7 @@ def update_charts(n_intervals, selected_placowka):
     )
 
     fig_czas_wizyty.update_layout(
-        title={'text': 'Średni czas wizyty w klinikach medycznych', 'x': 0.5, 'xanchor': 'center', 'font': {'family': 'Georgia'}},
+        title={'text': 'Średni czas wizyty w klinikach medycznych', 'x': 0.5, 'xanchor': 'center', 'font': {'color': 'darkgrey', 'family': 'Georgia'}},
         xaxis_title='Czas',
         yaxis_title='Średni czas wizyty (minuty)',
         legend_title='Placówka',
@@ -319,7 +334,7 @@ def update_charts(n_intervals, selected_placowka):
     )
 
     fig_oczekiwanie.update_layout(
-        title={'text': 'Średni czas oczekiwania na wizytę w klinikach medycznych', 'x': 0.5, 'xanchor': 'center', 'font': {'family': 'Georgia'}},
+        title={'text': 'Średni czas oczekiwania na wizytę w klinikach medycznych', 'x': 0.5, 'xanchor': 'center', 'font': {'color': 'darkgrey', 'family': 'Georgia'}},
         xaxis_title='Czas',
         yaxis_title='Średni czas oczekiwania (minuty)',
         legend_title='Placówka',
@@ -339,7 +354,7 @@ def update_charts(n_intervals, selected_placowka):
     )
 
     fig_sprzet.update_layout(
-        title={'text': 'Dostępny sprzęt medyczny w klinikach medycznych', 'x': 0.5, 'xanchor': 'center', 'font': {'family': 'Georgia'}},
+        title={'text': 'Dostępny sprzęt medyczny w klinikach medycznych', 'x': 0.5, 'xanchor': 'center', 'font': {'color': 'darkgrey', 'family': 'Georgia'}},
         xaxis_title='Placówka',
         yaxis_title='Dostępny sprzęt medyczny',
         legend_title='Placówka',
@@ -360,7 +375,7 @@ def update_charts(n_intervals, selected_placowka):
     )
 
     fig_personel.update_layout(
-        title={'text': 'Personel medyczny w klinikach medycznych', 'x': 0.5, 'xanchor': 'center', 'font': {'family': 'Georgia'}},
+        title={'text': 'Personel medyczny w klinikach medycznych', 'x': 0.5, 'xanchor': 'center', 'font': {'color': 'darkgrey', 'family': 'Georgia'}},
         xaxis_title='Personel medyczny',
         yaxis_title='Placówka',
         legend_title='Placówka',
@@ -382,7 +397,7 @@ def update_charts(n_intervals, selected_placowka):
     )
 
     fig_lozka.update_layout(
-        title={'text': 'Dostępne wolne łóżka w klinikach medycznych', 'x': 0.5, 'xanchor': 'center', 'font': {'family': 'Georgia'}},
+        title={'text': 'Dostępne wolne łóżka w klinikach medycznych', 'x': 0.5, 'xanchor': 'center', 'font': {'color': 'darkgrey', 'family': 'Georgia'}},
         xaxis_title='Czas',
         yaxis_title='Dostępne wolne łóżka',
         legend_title='Placówka',
@@ -390,6 +405,7 @@ def update_charts(n_intervals, selected_placowka):
     )
 
     return fig_pacjenci, fig_nagle_przypadki, fig_operacje, fig_zabiegi, fig_hospitalizacja, fig_czas_wizyty, fig_oczekiwanie, fig_sprzet, fig_personel, fig_lozka, dropdown_options
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
