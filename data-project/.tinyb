@@ -1,11 +1,11 @@
 {
     "host": "https://api.tinybird.co",
-    "id": "fdbc920e-f1dd-41f8-b6fa-89f8e0a72c9a",
-    "name": "medical_database2",
+    "id": "a9e8c0df-3790-45e9-a500-665d170a85ac",
+    "name": "medical_database3",
     "scope": "user",
-    "token": "p.eyJ1IjogImZkYmM5MjBlLWYxZGQtNDFmOC1iNmZhLTg5ZjhlMGE3MmM5YSIsICJpZCI6ICJkODI4YjJlYi1hMzdlLTQ4NzItOTIyZS0xZjlmN2U0MWUxMjkiLCAiaG9zdCI6ICJldV9zaGFyZWQifQ.LVp5DZ_R3R9XoyBCV8xvgkOwYhCV3c2xIoKn3wFekrw",
+    "token": "p.eyJ1IjogImE5ZThjMGRmLTM3OTAtNDVlOS1hNTAwLTY2NWQxNzBhODVhYyIsICJpZCI6ICJkN2NmMThhNC02ZDhmLTQyMWMtYjM5ZC03OTYyOGE1MTZlOWYiLCAiaG9zdCI6ICJldV9zaGFyZWQifQ.6biEhqQkwbSobA9PYK3HoL5YG6_0L2pVXrTJ5BdRJbM",
     "tokens": {
-        "https://api.tinybird.co": "p.eyJ1IjogImZkYmM5MjBlLWYxZGQtNDFmOC1iNmZhLTg5ZjhlMGE3MmM5YSIsICJpZCI6ICJkODI4YjJlYi1hMzdlLTQ4NzItOTIyZS0xZjlmN2U0MWUxMjkiLCAiaG9zdCI6ICJldV9zaGFyZWQifQ.LVp5DZ_R3R9XoyBCV8xvgkOwYhCV3c2xIoKn3wFekrw"
+        "https://api.tinybird.co": "p.eyJ1IjogImE5ZThjMGRmLTM3OTAtNDVlOS1hNTAwLTY2NWQxNzBhODVhYyIsICJpZCI6ICJkN2NmMThhNC02ZDhmLTQyMWMtYjM5ZC03OTYyOGE1MTZlOWYiLCAiaG9zdCI6ICJldV9zaGFyZWQifQ.6biEhqQkwbSobA9PYK3HoL5YG6_0L2pVXrTJ5BdRJbM"
     },
     "user_email": "w.wolek@wp.pl",
     "user_id": "e207f03d-8ee3-4a10-aaa3-33a7371fa96b",
