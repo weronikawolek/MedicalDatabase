@@ -110,7 +110,7 @@ app.layout = dbc.Container([
     ]),
     dcc.Interval(
         id='interval-component',
-        interval=21600000,  # Co 6 h
+        interval=1000,  # Co 1 min
         n_intervals=0
     ),
     dbc.Row([dbc.Col([dcc.Graph(id='bar-chart-pacjenci', config={'displayModeBar': False})], width=12)]),
