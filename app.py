@@ -95,7 +95,7 @@ def fetch_and_process_free_beds(tb_client, pipe_name):
     data = data.sort_values(by=['minuta'])
     return data
 
-
+# Layout aplikacji
 app.layout = dbc.Container([
     dbc.Row([
         dbc.Col(html.H1("DOSTĘP DO USŁUG MEDYCZNYCH W CZASIE RZECZYWISTYM", style={'color': 'LightBlue', 'font-family': 'Georgia', 'font-weight': 'bold'}, className='text-center'), width=12),
@@ -110,7 +110,7 @@ app.layout = dbc.Container([
     ]),
     dcc.Interval(
         id='interval-component',
-        interval=1000,  # Co 1 min
+        interval=3000,  # Co 3 s
         n_intervals=0
     ),
     dbc.Row([dbc.Col([dcc.Graph(id='bar-chart-pacjenci', config={'displayModeBar': False})], width=12)]),
@@ -127,22 +127,24 @@ app.layout = dbc.Container([
     dbc.Row([dbc.Col([dcc.Graph(id='scatter-chart-lozka', config={'displayModeBar': False})], width=12)])  # Nowy wykres punktowy
 ], fluid=True)
 
-
+# Deklaracja komponentów na stronie
 @app.callback(
-    [Output('bar-chart-pacjenci', 'figure'),
-     Output('bar-chart-nagle-przypadki', 'figure'),  # Zmieniony wykres
-     Output('pie-chart-operacje', 'figure'),
-     Output('pie-chart-zabiegi', 'figure'),
+    [Output('bar-chart-pacjenci', 'figure'), # Pionowy wykres słupkowy
+     Output('bar-chart-nagle-przypadki', 'figure'), # Poziomy wykres słupkowy
+     Output('pie-chart-operacje', 'figure'), # Wykres kołowy
+     Output('pie-chart-zabiegi', 'figure'), # Wykres kołowy
      Output('line-chart-hospitalizacja', 'figure'),  # Wykres liniowy
      Output('line-chart-czas-wizyty', 'figure'),  # Wykres liniowy
-     Output('line-chart-oczekiwanie', 'figure'),
-     Output('bar-chart-sprzet', 'figure'),  # Nowy wykres słupkowy
-     Output('bar-chart-personel', 'figure'),  # Nowy poziomy wykres słupkowy
-     Output('scatter-chart-lozka', 'figure'),  # Nowy wykres punktowy
-     Output('placowka-dropdown', 'options')],
+     Output('line-chart-oczekiwanie', 'figure'), # Wykres liniowy
+     Output('bar-chart-sprzet', 'figure'),  # Pionowy wykres słupkowy
+     Output('bar-chart-personel', 'figure'),  # Poziomy wykres słupkowy
+     Output('scatter-chart-lozka', 'figure'),  # Wykres punktowy
+     Output('placowka-dropdown', 'options')], # Filtrowanie placówek
     [Input('interval-component', 'n_intervals'),
      Input('placowka-dropdown', 'value')]
 )
+
+# Aktualizowanie wykresów w czasie rzeczywistym zgodnie z zadeklarowaną wartością interwału
 def update_charts(n_intervals, selected_placowka):
     tb_client = initialize_tb_client()
 
@@ -198,7 +200,7 @@ def update_charts(n_intervals, selected_placowka):
         filtered_personel = data_personel
         filtered_lozka = data_lozka  # Dane o wolnych łóżkach bez filtra
 
-    # Przygotowanie danych do wykresów
+    # Przygotowanie danych do wykresu pionowego słupkowego o ilości pacjentów
     bar_data = filtered_pacjenci.groupby('placowka')['suma_przyjetych_pacjentow'].sum().reset_index()
 
     fig_pacjenci = px.bar(
@@ -207,7 +209,7 @@ def update_charts(n_intervals, selected_placowka):
         y='suma_przyjetych_pacjentow',
         labels={'suma_przyjetych_pacjentow': 'Łączna liczba pacjentów', 'placowka': 'Placówka'},
         template='plotly_white',
-        color_discrete_sequence=px.colors.qualitative.Pastel1  # Niestandardowa sekwencja kolorów
+        color_discrete_sequence=px.colors.qualitative.Pastel1
     )
 
     fig_pacjenci.update_layout(
@@ -219,7 +221,7 @@ def update_charts(n_intervals, selected_placowka):
     )
     fig_pacjenci.update_traces(marker_color='LightPink')
 
-    # Przygotowanie danych do wykresu poziomego słupkowego dla nagłych przypadków
+    # Przygotowanie danych do wykresu poziomego słupkowego o ilości nagłych przypadków
     bar_nagle_przypadki_data = filtered_nagle_przypadki.groupby('placowka')['suma_naglych_przypadkow'].sum().reset_index()
 
     fig_nagle_przypadki = px.bar(
@@ -228,8 +230,8 @@ def update_charts(n_intervals, selected_placowka):
         x='suma_naglych_przypadkow',
         labels={'suma_naglych_przypadkow': 'Liczba nagłych przypadków', 'placowka': 'Placówka'},
         template='plotly_white',
-        orientation='h',  # Ustawienie orientacji wykresu na poziomą
-        color_discrete_sequence=px.colors.qualitative.Pastel2  # Niestandardowa sekwencja kolorów
+        orientation='h',
+        color_discrete_sequence=px.colors.qualitative.Pastel2
     )
 
     fig_nagle_przypadki.update_layout(
@@ -241,7 +243,7 @@ def update_charts(n_intervals, selected_placowka):
     )
     fig_nagle_przypadki.update_traces(marker_color='LightBlue')
 
-    # Przygotowanie danych do wykresu kołowego dla operacji
+    # Przygotowanie danych do wykresu kołowego o ilości przeprowadzonych operacji
     pie_data = filtered_operacje.groupby('placowka')['suma_skumulowana'].sum().reset_index()
 
     fig_operacje = px.pie(
@@ -249,16 +251,16 @@ def update_charts(n_intervals, selected_placowka):
         names='placowka',
         values='suma_skumulowana',
         template='plotly_white',
-        color_discrete_sequence=px.colors.qualitative.Pastel2  # Niestandardowa sekwencja kolorów
+        color_discrete_sequence=px.colors.qualitative.Pastel2
     )
 
-    fig_operacje.update_traces(textinfo='value')  # Wyświetlanie tylko liczby
+    fig_operacje.update_traces(textinfo='value')
 
     fig_operacje.update_layout(
         title={'text': 'Liczba przeprowadzonych operacji w klinikach medycznych', 'x': 0.5, 'xanchor': 'center', 'font': {'color': 'darkgrey', 'family': 'Georgia'}}
     )
 
-    # Przygotowanie danych do wykresu kołowego dla zabiegów
+    # Przygotowanie danych do wykresu kołowego o ilości wykonanych zabiegów
     pie_data_zabiegi = filtered_zabiegi.groupby('placowka')['suma_wykonanych_zabiegow'].sum().reset_index()
 
     fig_zabiegi = px.pie(
@@ -266,16 +268,16 @@ def update_charts(n_intervals, selected_placowka):
         names='placowka',
         values='suma_wykonanych_zabiegow',
         template='plotly_white',
-        color_discrete_sequence=px.colors.qualitative.Pastel1 # Niestandardowa sekwencja kolorów
+        color_discrete_sequence=px.colors.qualitative.Pastel1
     )
 
-    fig_zabiegi.update_traces(textinfo='value')  # Wyświetlanie tylko liczby
+    fig_zabiegi.update_traces(textinfo='value')
 
     fig_zabiegi.update_layout(
         title={'text': 'Liczba wykonanych zabiegów w klinikach medycznych', 'x': 0.5, 'xanchor': 'center', 'font': {'color': 'darkgrey', 'family': 'Georgia'}}
     )
 
-    # Przygotowanie danych do wykresu liniowego dla średniego czasu hospitalizacji
+    # Przygotowanie danych do wykresu liniowego o średnim czasie hospitalizacji
     line_hospitalizacja_data = filtered_hospitalizacja.groupby(['minuta', 'placowka'])[
         'sredni_czas_hospitalizacji'].mean().reset_index()
 
@@ -297,7 +299,7 @@ def update_charts(n_intervals, selected_placowka):
         hovermode='x'
     )
 
-    # Przygotowanie danych do wykresu liniowego dla średniego czasu wizyty
+    # Przygotowanie danych do wykresu liniowego o średnim czasie wizyty
     line_czas_wizyty_data = filtered_czas_wizyty.groupby(['minuta', 'placowka'])[
         'sredni_czas_wizyty'].mean().reset_index()
 
@@ -308,7 +310,7 @@ def update_charts(n_intervals, selected_placowka):
         color='placowka',
         labels={'sredni_czas_wizyty': 'Średni czas wizyty (minuty)', 'minuta': 'Czas'},
         template='plotly_white',
-        color_discrete_sequence=px.colors.qualitative.Pastel2  # Niestandardowa sekwencja kolorów
+        color_discrete_sequence=px.colors.qualitative.Pastel2
     )
 
     fig_czas_wizyty.update_layout(
@@ -319,7 +321,7 @@ def update_charts(n_intervals, selected_placowka):
         hovermode='x'
     )
 
-    # Przygotowanie danych do wykresu liniowego dla średniego czasu oczekiwania
+    # Przygotowanie danych do wykresu liniowego o średnim czasie oczekiwania na wizytę
     line_data = filtered_oczekiwanie.groupby(['minuta', 'placowka'])[
         'sredni_czas_oczekiwania_na_wizyte'].mean().reset_index()
 
@@ -330,7 +332,7 @@ def update_charts(n_intervals, selected_placowka):
         color='placowka',
         labels={'sredni_czas_oczekiwania_na_wizyte': 'Średni czas oczekiwania (dni)', 'minuta': 'Czas'},
         template='plotly_white',
-        color_discrete_sequence=px.colors.qualitative.Pastel2  # Niestandardowa sekwencja kolorów
+        color_discrete_sequence=px.colors.qualitative.Pastel2
     )
 
     fig_oczekiwanie.update_layout(
@@ -341,7 +343,7 @@ def update_charts(n_intervals, selected_placowka):
         hovermode='x'
     )
 
-    # Przygotowanie danych do wykresu słupkowego dla dostępnego sprzętu medycznego
+    # Przygotowanie danych do wykresu pionowego słupkowego o ilości dostępnego sprzętu medycznego
     bar_sprzet_data = filtered_sprzet.groupby('placowka')['dostepny_sprzet_medyczny'].sum().reset_index()
 
     fig_sprzet = px.bar(
@@ -350,7 +352,7 @@ def update_charts(n_intervals, selected_placowka):
         y='dostepny_sprzet_medyczny',
         labels={'dostepny_sprzet_medyczny': 'Dostępny sprzęt medyczny', 'placowka': 'Placówka'},
         template='plotly_white',
-        color_discrete_sequence=px.colors.qualitative.Pastel1  # Niestandardowa sekwencja kolorów
+        color_discrete_sequence=px.colors.qualitative.Pastel1
     )
 
     fig_sprzet.update_layout(
@@ -361,7 +363,7 @@ def update_charts(n_intervals, selected_placowka):
         hovermode='x'
     )
 
-    # Przygotowanie danych do wykresu poziomego słupkowego dla personelu medycznego
+    # Przygotowanie danych do wykresu poziomego słupkowego o ilości dostępnego personelu medycznego
     bar_personel_data = filtered_personel.groupby('placowka')['personel_medyczny'].sum().reset_index()
 
     fig_personel = px.bar(
@@ -370,8 +372,8 @@ def update_charts(n_intervals, selected_placowka):
         x='personel_medyczny',
         labels={'personel_medyczny': 'Personel medyczny', 'placowka': 'Placówka'},
         template='plotly_white',
-        orientation='h',  # Ustawienie orientacji wykresu na poziomą
-        color_discrete_sequence=px.colors.qualitative.Pastel2  # Niestandardowa sekwencja kolorów
+        orientation='h',
+        color_discrete_sequence=px.colors.qualitative.Pastel2
     )
 
     fig_personel.update_layout(
@@ -382,7 +384,7 @@ def update_charts(n_intervals, selected_placowka):
         hovermode='y'
     )
 
-    # Przygotowanie danych do wykresu punktowego dla dostępnych wolnych łóżek
+    # Przygotowanie danych do wykresu punktowego o ilości dostępnych łóżek
     scatter_lozka_data = filtered_lozka.groupby(['minuta', 'placowka'])[
         'suma_dostepnych_lozek'].sum().reset_index()
 
@@ -393,7 +395,7 @@ def update_charts(n_intervals, selected_placowka):
         color='placowka',
         labels={'suma_dostepnych_lozek': 'Dostępne wolne łóżka', 'minuta': 'Czas'},
         template='plotly_white',
-        color_discrete_sequence=px.colors.qualitative.Pastel1  # Niestandardowa sekwencja kolorów
+        color_discrete_sequence=px.colors.qualitative.Pastel1
     )
 
     fig_lozka.update_layout(
